@@ -1,0 +1,261 @@
+{%load static%}
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+  
+    <title>Movie Manager Tool</title>
+    <style>
+        body{
+            background-color: #f2f0f0;
+        }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+        <div class="my-3">
+            <h1 class="text-center">Movies</h1>
+        </div>  
+        <div class="mx-5" >
+            <div class="d-flex justify-content-end">
+                <button type="button" class='btn btn-info modelbtn' data-dismiss="modal">Add Movie</button>
+                <button type="button" class='btn btn-secondary ml-2' id="logout">Logout</button>
+            </div>
+        </div> 
+        <div class="m-5">
+            <table class="table" style="background-color: #fff;">
+                <thead class="thead-dark">
+                  <tr>
+                    <th scope="col">Movie ID</th>
+                    <th scope="col">Title</th>
+                    <th scope="col">Type</th>
+                    <th scope="col">Rating</th>
+                    <th scope="col">Director</th>
+                    <th scope="col">Producer</th>
+                    <th scope="col">Writer</th>
+                    <th scope="col">Edit</th>
+                    <th scope="col">Delete</th>
+                  </tr>
+                </thead>
+                <tbody id="movie-table">
+                </tbody>
+            </table>  
+        </div>
+    </div>
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Movie</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+                <form id="movieForm">
+                    <div class="form-group">
+                      <label>Title</label>
+                      <input type="hidden" id="movieid">
+                      <input type="text" class="form-control" id="title" placeholder="Enter Title">
+                    </div>
+                    <div class="form-group">
+                      <label>Type</label>
+                      <select class="form-control" id="type">
+                        <option value="action">Action</option>
+                        <option value="drama">Drama</option>
+                        <option value="comedy">Comedy</option>
+                        <option value="sifi">Si-Fi</option>
+                        <option value="adventure">Adventure</option>
+                        <option value="horror">Horror</option>
+                        <option value="romance">Romance</option>
+                        <option value="family">Family</option>
+                        <option value="animation">Animation</option>
+                        <option value="documentary">Documentary</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label>Rating</label>
+                      <select class="form-control" id="rating">
+                        <option value="g">G</option>
+                        <option value="pg">PG</option>
+                        <option value="pg-13">PG-13</option>
+                        <option value="r">R</option>
+                        <option value="nc-17">NC-17</option>
+                        <option value="unrated">Unrated</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label>Director</label>
+                      <input type="text" class="form-control" id="director" placeholder="Enter Director Name">
+                    </div>
+                    <div class="form-group">
+                      <label>Producer</label>
+                      <input type="text" class="form-control" id="producer" placeholder="Enter Producer Name">
+                    </div>
+                    <div class="form-group">
+                      <label>Writer</label>
+                      <input type="text" class="form-control" id="writer" placeholder="Enter Writer Name">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button type="submit" class="btn btn-primary" form="movieForm">Save changes</button>
+            </div>
+          </div>
+        </div>
+    </div>
+    <div class="modal fade" id="deleteMovieModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Delete Movie</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+                <p>Movie ID -  <span id="delmovieid"></span></p>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+                <button type="submit" class="btn btn-primary" id="deletemoviebtn" data-mdmovieid="">Yes</button>
+            </div>
+          </div>
+        </div>
+    </div>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        if(localStorage.getItem("authenticationtoken") === null){
+            location.replace("/login/")
+        }
+        // jQuery
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        function loadResults(){
+                jQuery.ajax({url: `/api/movie/`,headers: {"Authorization": `token ${localStorage.getItem('authenticationtoken')}`}, success: function(data){
+                    $( "#movie-table" ).html("");
+                    let result = data;
+                    result.forEach(function (arrayItem) {
+                      let id = (arrayItem.id) ? arrayItem.id.toString(): "";
+                      let title = (arrayItem.title) ? arrayItem.title.toString(): "";
+                      let type = (arrayItem.type) ? arrayItem.type: {};
+                      let rating = (arrayItem.rating) ? arrayItem.rating: {};
+                      let director = (arrayItem.director) ? arrayItem.director: "";
+                      let producer = (arrayItem.producer) ? arrayItem.producer: "";
+                      let writer = (arrayItem.writer) ? arrayItem.writer: "";
+                    
+                      $( "#movie-table" ).append( "<tr> <td>"+id+"</td><td>"+title+"</td><td>"+type.text+"</td><td>"+rating.text+"</td><td>"+director+"</td><td>"+producer+"</td><td>"+writer+"</td> <td><button class='btn btn-info modelbtn' type='button' data-movieid='"+id+"' data-title='"+title+"' data-type='"+type.value+"' data-rating='"+rating.value+"' data-director='"+director+"' data-producer='"+producer+"' data-writer='"+writer+"'  >Edit</button></td><td><button class='btn btn-danger deletemovie' type='button' data-dmovieid='"+id+"'>Delete</button></td></tr>" );
+                    });
+                }});
+            }
+        
+            loadResults();
+       
+        $(document).ready( function () {
+            $(document).on('click','.modelbtn', function(){
+                // do something here
+                $('#exampleModal').modal('show');
+                $('#movieid').val($(this).attr("data-movieid"));
+                $('#title').val($(this).attr("data-title"));
+                $('#type').val($(this).attr("data-type"));
+                $('#rating').val($(this).attr("data-rating"));
+                $('#director').val($(this).attr("data-director"));
+                $('#producer').val($(this).attr("data-producer"));
+                $('#writer').val($(this).attr("data-writer"));
+            });
+
+            $("#movieForm").submit(function( event ) {
+                event.preventDefault();
+                let id = $('#movieid').val();
+                let title = $('#title').val();
+                let type = $('#type').val();
+                let rating = $('#rating').val();
+                let director = $('#director').val();
+                let producer = $('#producer').val();
+                let writer = $('#writer').val();
+                let data = {"id":id, "title":title, "type":type, "rating":rating, "director":director, "producer":producer, "writer":writer};
+                
+                const csrftoken = getCookie('csrftoken');
+                let url;
+                let method;
+
+                if (id){
+                    url = `/api/movie/${id}`;
+                    method = 'PUT';
+                }else{
+                    url = "/api/movie/";
+                    method = 'POST';
+                }
+ 
+                $.ajax(url, {
+                    type: method,  // http method
+                    data: data,  // data to submit
+                    headers: {'X-CSRFToken': csrftoken, "Authorization": `token ${localStorage.getItem('authenticationtoken')}`},
+                    success: function (resdata, status, xhr) {
+                        $('#exampleModal').modal('hide');
+                        loadResults();
+                    },
+                    error: function (jqXhr, textStatus, errorMessage) {
+                            $('#exampleModal').modal('hide');  
+                    }
+                });
+            });
+
+            $(document).on('click','.deletemovie', function(){
+                // do something here
+                $('#deleteMovieModal').modal('show');
+                let movieid = $(this).attr("data-dmovieid")
+                $('#deletemoviebtn').attr("data-mdmovieid",movieid);
+                $('#delmovieid').text(movieid);
+            });
+
+            $(document).on('click','#deletemoviebtn', function(){
+                let movieid = $("#deletemoviebtn").attr("data-mdmovieid");
+                const csrftoken = getCookie('csrftoken');
+
+                $.ajax(`api/movie/${movieid}`, {
+                    type: 'DELETE',  // http method
+                    headers: {'X-CSRFToken': csrftoken, "Authorization": `token ${localStorage.getItem('authenticationtoken')}`},
+                    success: function (resdata, status, xhr) {
+                        $('#deleteMovieModal').modal('hide');
+                        loadResults();
+
+                    },
+                    error: function (jqXhr, textStatus, errorMessage) {
+                            $('#deleteMovieModal').modal('hide');  
+                            alert(errorMessage);
+                    }
+                });
+               
+            });
+
+            $(document).on('click','#logout', function(){
+                localStorage.clear();
+                location.replace("/login/");
+            });
+        });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Movie Manager Tool</title>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style type="text/css">
+    body {
+        margin: 0;
+        padding: 0;
+        background-color: #17a2b8;
+        height: 100vh;
+    }
+
+    #video .container #video-row #video-column #video-box {
+        margin-top: 100px;
+        border: 1px solid #9C9C9C;
+        background-color: #EAEAEA;
+    }
+
+    #video .container #video-row #video-column #video-box #video-form {
+        padding: 20px;
+    }
+
+    #video .container #video-row #video-column #video-box #video-form #register-link {
+        margin-top: -85px;
+    }
+    </style>
+</head>
+
+<body>
+    <div id="video">
+        <h3 class="text-center text-white pt-5">Movie Manager Tool</h3>
+        <div class="container">
+            <div id="video-row" class="row justify-content-center align-items-center">
+                <div id="video-column" class="col-md-6">
+                    <div id="video-box" class="col-md-12">
+                        <form id="video-form" class="form">
+                            <h3 class="text-center text-info">video</h3>
+                            <div class="form-group">
+                                <label for="video" class="text-info">Upload Video:</label><br>
+                                <input type="file" name="video" id="video" class="form-control">
+                            </div>
+                            <div class="form-group text-center">
+                                <div class="my-2 d-flex justify-content-center align-items-center">
+                                    <div id="loading" class="spinner-border text-info" role="status" style="display: none;">
+                                        <span class="sr-only">Loading...</span>
+                                    </div>
+                                </div>
+                                <input type="submit" name="submit" class="btn btn-info btn-lg btn-block video-button" value="Submit">
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        $(document).ready( function () {
+
+
+            $(document).ajaxStart(function () {
+                $('#loading').show();
+            });
+    
+            $(document).ajaxStop(function () {
+                $('#loading').hide();
+            });
+
+
+            $("#video-form").submit(function( event ) {
+                event.preventDefault();
+
+                const formData = new FormData($('#video-form')[0]);
+                
+                const csrftoken = getCookie('csrftoken');
+                
+
+                $.ajax("/api/video/", {
+                    type: "POST",  // http method
+                    data: formData,
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    headers: {'X-CSRFToken': csrftoken},
+                    xhrFields: {
+                        responseType: 'blob' // Set the response type to 'blob'
+                    },
+                    success: function (data) {
+                        const url = URL.createObjectURL(data);
+                        const a = document.createElement('a');
+                        a.style.display = 'none';
+                        a.href = url;
+                        // the filename you want
+                        a.download = 'output.mp4';
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                        alert('your file has downloaded!');
+                        $('#video-form')[0].reset();
+                    },
+                    error: function (jqXhr, textStatus, errorMessage) {
+                        alert(jqXhr.responseText);
+                    }
+                });
+            });
+            
+        });
+    </script>
+</body>
+
+</html>
