@@ -8,7 +8,7 @@ The application consists of API endpoints for managing users, movies, and video 
   - show the Hello, Django! text.
 - **Movie Management:**
   - Create, list, view, update, delete Movies.
-- **Video Generatin:**
+- **Video Generation:**
   -We can upload the video, and after uploading, a watermarked version of the video is available for download.
 
 ## Installation
