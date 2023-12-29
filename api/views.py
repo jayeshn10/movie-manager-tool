@@ -97,7 +97,7 @@ class MovieAPI(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-    def put(self, request, id):
+    def put(self, request, id=None):
         if Movie.objects.filter(id=id).exists():
             movie = Movie.objects.get(id=id)
             serializer = MovieSerializer(data=request.data)
@@ -115,7 +115,7 @@ class MovieAPI(APIView):
         else:
             return Response({"message":"Data Not Found"}, status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request, id):
+    def delete(self, request, id=None):
         if Movie.objects.filter(id=id).exists():
             movie = Movie.objects.get(id=id)
             movie.delete()
@@ -132,7 +132,7 @@ def VideoAPI(request):
         temp_video_file.write(video_file.read())
 
     video = VideoFileClip(temp_video_path)
-    txt_clip = ( TextClip("Jayesh Nandgaonkar",fontsize=140,color='white').set_position('center').set_duration(10) )
+    txt_clip = ( TextClip("Jayesh Nandgaonkar",fontsize=40,color='white').set_position('center').set_duration(10) )
     result = CompositeVideoClip([video, txt_clip])
     
     output_video_path = os.path.join(settings.MEDIA_ROOT, 'temp', 'output_{}.mp4'.format(''.join(random.choices(string.ascii_lowercase, k=5))))
